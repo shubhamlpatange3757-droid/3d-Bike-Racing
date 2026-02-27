@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Turbo Bike</title>
+
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    background:linear-gradient(to bottom,#000000,#111);
+    font-family:Arial;
+    color:white;
+}
+
+#menu, #gameOver {
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+}
+
+button{
+    padding:12px 25px;
+    font-size:18px;
+    background:#00ffcc;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    margin:10px;
+    font-weight:bold;
+}
+
+button:hover{
+    background:#00ccaa;
+}
+
+#scoreBoard{
+    position:absolute;
+    top:10px;
+    left:10px;
+    font-size:18px;
+}
+
+canvas{
+    display:block;
+}
+
+#footer{
+    position:absolute;
+    bottom:5px;
+    width:100%;
+    text-align:center;
+    font-size:12px;
+    opacity:0.7;
+}
+</style>
+</head>
+
+<body>
+
+<div id="menu">
+    <h1>🏍 Ultimate Turbo Bike</h1>
+    <p>Professional Racing Experience</p>
+    <button onclick="startGame()">Start Game</button>
+</div>
+
+<div id="gameOver" style="display:none;">
+    <h1>Game Over</h1>
+    <p id="finalScore"></p>
+    <button onclick="restart()">Restart</button>
+</div>
+
+<div id="scoreBoard">Score: 0</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<div id="footer">
+Developed by Shubham Studios © 2026
+</div>
+
+<script>
+let canvas = document.getElementById("gameCanvas");
+let ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let bike = { x:200, y:canvas.height-120, width:50, height:80 };
+let obstacles = [];
+let speed = 6;
+let score = 0;
+let running = false;
+
+function startGame(){
+    document.getElementById("menu").style.display="none";
+    running = true;
+    gameLoop();
+}
+
+function restart(){
+    location.reload();
+}
+
+function drawBike(){
+    ctx.fillStyle="#00ffcc";
+    ctx.fillRect(bike.x, bike.y, bike.width, bike.height);
+}
+
+function drawObstacle(ob){
+    ctx.fillStyle="red";
+    ctx.fillRect(ob.x, ob.y, ob.width, ob.height);
+}
+
+function createObstacle(){
+    let x = Math.random() * (canvas.width-50);
+    obstacles.push({x:x, y:-100, width:50, height:80});
+}
+
+function update(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    drawBike();
+
+    for(let i=0;i<obstacles.length;i++){
+        let ob = obstacles[i];
+        ob.y += speed;
+        drawObstacle(ob);
+
+        if(
+            bike.x < ob.x + ob.width &&
+            bike.x + bike.width > ob.x &&
+            bike.y < ob.y + ob.height &&
+            bike.y + bike.height > ob.y
+        ){
+            endGame();
+        }
+
+        if(ob.y > canvas.height){
+            obstacles.splice(i,1);
+            score++;
+            document.getElementById("scoreBoard").innerText="Score: "+score;
+        }
+    }
+}
+
+function gameLoop(){
+    if(!running) return;
+    update();
+    requestAnimationFrame(gameLoop);
+}
+
+function endGame(){
+    running=false;
+    document.getElementById("gameOver").style.display="block";
+    document.getElementById("finalScore").innerText="Your Score: "+score;
+}
+
+setInterval(()=>{
+    if(running) createObstacle();
+},1500);
+
+document.addEventListener("mousemove",function(e){
+    bike.x = e.clientX - bike.width/2;
+});
+</script>
+
+</body>
+</html>
